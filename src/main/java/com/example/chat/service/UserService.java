@@ -1,10 +1,10 @@
-package com.example.chat.utils;
+package com.example.chat.service;
 import com.example.chat.models.User;
 import com.example.chat.repository.UserRepository;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +23,13 @@ public class UserService {
 
     public Optional<User> findById(String id){
         return ob1.findById(id);
+    }
+
+    public List<User> getFriends(String id){
+        Optional<User> user=ob1.findById(id);
+        if(user.isPresent())
+            return user.get().getFriends();
+        return new ArrayList<User>();
     }
 
     public Optional<User> findByUsername( String username){

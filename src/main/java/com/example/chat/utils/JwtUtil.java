@@ -1,6 +1,7 @@
 package com.example.chat.utils;
 
 import com.example.chat.models.User;
+import com.example.chat.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

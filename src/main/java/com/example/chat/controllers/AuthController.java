@@ -6,15 +6,14 @@ import com.example.chat.models.User;
 import com.example.chat.repository.UserRepository;
 import com.example.chat.utils.ImageService;
 import com.example.chat.utils.JwtUtil;
-import com.example.chat.utils.UserService;
+import com.example.chat.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -36,18 +33,20 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UserService userService;
     private final ImageService imageService;
+    private final MongoTemplate mongoTemplate;
 
     public AuthController(UserRepository userRepository,
                           PasswordEncoder passwordEncoder,
                           AuthenticationManager authManager,
                           JwtUtil jwtUtil,
-                          UserService userService, ImageService imageService) {
+                          UserService userService, ImageService imageService, MongoTemplate mongoTemplate) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authManager = authManager;
         this.jwtUtil = jwtUtil;
         this.userService=userService;
         this.imageService = imageService;
+        this.mongoTemplate = mongoTemplate;
     }
 
     @PostMapping(value = "/register")
@@ -141,3 +140,4 @@ public class AuthController {
     }
 
 }
+
