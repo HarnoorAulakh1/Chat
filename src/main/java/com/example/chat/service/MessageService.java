@@ -1,18 +1,68 @@
 package com.example.chat.service;
 
 import com.example.chat.models.Message;
+import com.example.chat.models.User;
 import com.example.chat.repository.MessageRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class MessageService {
 
     @Autowired
     private MessageRepository messageRepository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private UserService userService;
+
+    public List<Message> getMessages(String sender,String receiver){
+        Query query = new Query();
+        query.addCriteria(
+                new Criteria().orOperator(
+                        new Criteria().andOperator(
+                                Criteria.where("sender").is(sender),
+                                Criteria.where("receiver").is(receiver)
+                        ),
+                        new Criteria().andOperator(
+                                Criteria.where("sender").is(receiver),
+                                Criteria.where("receiver").is(sender)
+                        )
+                )
+        );
+
+        query.with(Sort.by(Sort.Direction.ASC, "created_at"));
+
+        List<Message> messages = mongoTemplate.find(query,Message.class);
+
+        for (Message msg : messages) {
+            if (msg.getSender() != null) {
+                Optional<User> user1=userService.findById(msg.getSender());
+                if(user1.isPresent())
+                    msg.setSenderEm(user1.get());
+            }
+            if (msg.getReceiver() != null) {
+                Optional<User> user1=userService.findById(msg.getReceiver());
+                if(user1.isPresent())
+                    msg.setReceiverEm(user1.get());
+            }
+        }
+        return messages;
+    }
 
     public Message getPreview(String sender,String receiver){
         List<Message> messages = messageRepository.findBySenderAndReceiver(
@@ -25,4 +75,64 @@ public class MessageService {
         return messages.get(0);
     }
 
+    public long getUnreadCount(String receiver,String sender,String readBy){
+
+        if(readBy.equals(sender)){
+            String temp=sender;
+            sender=receiver;
+            receiver=temp;
+        }
+        Query query = new Query();
+
+        query.addCriteria(Criteria.where("receiver").is(receiver));
+        query.addCriteria(Criteria.where("sender").is(sender));
+
+        Criteria notReadCriteria = Criteria.where("isRead").not().elemMatch(
+                Criteria.where("user").is(readBy)
+                        .and("readAt").exists(true)
+        );
+
+        query.addCriteria(notReadCriteria);
+
+        return mongoTemplate.count(query, Message.class);
+    }
+
+    public void markAsRead(String sender,String receiver,String time,String readBy){
+
+        Instant instant = Instant.parse(time);  // parse ISO string
+        Date isoTime= Date.from(instant);
+        Query query = new Query();
+
+        query.addCriteria(
+                new Criteria().orOperator(
+                        new Criteria().andOperator(
+                                Criteria.where("sender").is(sender),
+                                Criteria.where("receiver").is(receiver)
+                        ),
+                        new Criteria().andOperator(
+                                Criteria.where("sender").is(receiver),
+                                Criteria.where("receiver").is(sender)
+                        )
+                )
+        );
+
+        query.addCriteria(
+                Criteria.where("isRead").not().elemMatch(
+                        Criteria.where("user").is(readBy)
+                                .and("readAt").exists(true)
+                )
+        );
+
+        query.addCriteria(Criteria.where("created_at").lte(isoTime));
+
+        Update update = new Update().push("isRead",
+                Map.of(
+                        "user", readBy,
+                        "readAt", new Date()
+                )
+        );
+
+        mongoTemplate.updateMulti(query, update, Message.class);
+    }
 }
+

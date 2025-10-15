@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface NotificationRepository extends MongoRepository<Notifications,String> {
 
-    List<Notifications> findBySender(ObjectId sender );
-    List<Notifications> findByReceiver( ObjectId receiver );
+    List<Notifications> findBySender(String sender );
+    List<Notifications> findByReceiver( String receiver );
+    List<Notifications> deleteByReceiver( String receiver );
 }

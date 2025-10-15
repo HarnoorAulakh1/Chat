@@ -3,6 +3,7 @@ package com.example.chat.models;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -17,9 +18,8 @@ public class Message {
 
     @Id
     private String id;
-
-    private User sender;
-    private User receiver;
+    private String sender;
+    private String receiver;
 
     private String content;
     private String group;
@@ -31,5 +31,18 @@ public class Message {
     @CreatedDate
     private Date created_At;
 
-    private List<User> isRead = new ArrayList<>();
+    private List<read> isRead = new ArrayList<>();
+
+    @Transient
+    private User senderEm;
+
+    @Transient
+    private User receiverEm;
+}
+
+
+@Data
+class read{
+    private User user;
+    private String readAt;
 }
