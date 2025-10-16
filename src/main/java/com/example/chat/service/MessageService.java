@@ -98,20 +98,17 @@ public class MessageService {
     }
 
     public void markAsRead(String sender,String receiver,String time,String readBy){
+        time = time.replace(" ", "+");
+        Instant instant = Instant.parse(time);
 
-        Instant instant = Instant.parse(time);  // parse ISO string
         Date isoTime= Date.from(instant);
         Query query = new Query();
 
         query.addCriteria(
                 new Criteria().orOperator(
                         new Criteria().andOperator(
-                                Criteria.where("sender").is(sender),
-                                Criteria.where("receiver").is(receiver)
-                        ),
-                        new Criteria().andOperator(
-                                Criteria.where("sender").is(receiver),
-                                Criteria.where("receiver").is(sender)
+                                Criteria.where("sender").is(receiver.equals(readBy)?sender:receiver),
+                                Criteria.where("receiver").is(readBy)
                         )
                 )
         );
@@ -123,7 +120,9 @@ public class MessageService {
                 )
         );
 
-        query.addCriteria(Criteria.where("created_at").lte(isoTime));
+
+        query.addCriteria(Criteria.where("created_At").lte(isoTime));
+        System.out.println(mongoTemplate.find(query,Message.class));
 
         Update update = new Update().push("isRead",
                 Map.of(

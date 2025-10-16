@@ -36,7 +36,7 @@ public class JwtSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/auth/**", "/api/random","/public","/user/checkLogin").permitAll()
+                        auth.requestMatchers("/ws/**","/auth/**", "/api/random","/public","/user/checkLogin").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
