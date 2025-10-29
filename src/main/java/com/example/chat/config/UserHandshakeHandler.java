@@ -15,7 +15,6 @@ public class UserHandshakeHandler extends DefaultHandshakeHandler {
                                       Map<String, Object> attributes) {
         String username = (String) attributes.get("username");
         if (username == null) username = "unknown";
-        System.out.println("username in handshake ="+username);
         String finalUsername = username;
         return () -> finalUsername;
     }

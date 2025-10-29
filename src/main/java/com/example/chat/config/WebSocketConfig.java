@@ -28,6 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         // Messages bound for @MessageMapping are prefixed with "/app"
         config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override
@@ -48,7 +49,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         if (principal != null) {
             String username = principal.getName();
             String sessionId = accessor.getSessionId();
-            System.out.println("User connected: " + username + " -> " + sessionId);
+            //System.out.println("User connected: " + username + " -> " + sessionId);
         } else {
             System.out.println("No principal found for session: " + accessor.getSessionId());
         }
