@@ -30,10 +30,8 @@ public class User {
     @NonNull
     private String email;
     private String profilePicture;
-    @DBRef
-    private List<User> friends=new ArrayList<>();
-    @DBRef
-    private List<Group> groups=new ArrayList<>();
+    private List<String> friends=new ArrayList<>();
+    private List<String> groups=new ArrayList<>();
     private boolean isOnline;
 
 }

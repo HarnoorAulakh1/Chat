@@ -28,8 +28,23 @@ public class UserService {
     public List<User> getFriends(String id){
         Optional<User> user=ob1.findById(id);
         if(user.isPresent())
-            return user.get().getFriends();
+            return ob1.findAllById(user.get().getFriends());
         return new ArrayList<User>();
+    }
+
+    public void addFriend(String userId,String friendId){
+        if(userId==null || friendId==null)
+            return;
+        Optional<User> user=ob1.findById(userId);
+        Optional<User> friend=ob1.findById(friendId);
+        if(user.isPresent() && friend.isPresent()){
+            User userExtracted1=user.get();
+            userExtracted1.getFriends().add(friendId);
+            User userExtracted2=friend.get();
+            userExtracted2.getFriends().add(userId);
+            ob1.save(userExtracted1);
+            ob1.save(userExtracted2);
+        }
     }
 
     public Optional<User> findByUsername( String username){

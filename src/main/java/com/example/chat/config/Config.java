@@ -45,7 +45,7 @@ public class Config {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(factory);
         container.addMessageListener(listenerAdapterForChat, new ChannelTopic("chat"));
-        container.addMessageListener(listenerAdapterForFriendRequests, new ChannelTopic("FriendReq"));
+        container.addMessageListener(listenerAdapterForFriendRequests, new ChannelTopic("notifications"));
         return container;
     }
 

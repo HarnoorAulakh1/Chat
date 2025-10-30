@@ -3,6 +3,7 @@ package com.example.chat.service;
 import com.example.chat.models.Message;
 import com.example.chat.models.User;
 import com.example.chat.repository.MessageRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -28,7 +29,17 @@ public class MessageService {
     private MongoTemplate mongoTemplate;
 
     @Autowired
+    private RedisPublisher redisPublisher;
+
+    @Autowired
     private UserService userService;
+
+    public void push(Message message) throws JsonProcessingException {
+        if(message.getSender()==null || message.getReceiver()==null || message.getContent()==null)
+            return;
+        Message saved=messageRepository.save(message);
+        redisPublisher.publish("chat",saved);
+    }
 
     public List<Message> getMessages(String sender,String receiver){
         Query query = new Query();
