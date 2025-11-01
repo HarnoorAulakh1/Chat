@@ -34,6 +34,10 @@ public class MessageService {
     @Autowired
     private UserService userService;
 
+    public Message save(Message message){
+       return messageRepository.save(message);
+    }
+
     public void push(Message message) throws JsonProcessingException {
         if(message.getSender()==null || message.getReceiver()==null || message.getContent()==null)
             return;

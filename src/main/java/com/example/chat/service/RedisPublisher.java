@@ -20,7 +20,6 @@ public class RedisPublisher {
     public void publish(String channel, Object message) throws JsonProcessingException {
         ObjectMapper mapper=new ObjectMapper();
         String json=mapper.writeValueAsString(message);
-        System.out.println("Receiverd req = "+json);
         redisTemplate.convertAndSend(channel, json);
     }
 }
