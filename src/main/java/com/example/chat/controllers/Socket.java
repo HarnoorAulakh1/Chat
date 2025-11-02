@@ -42,10 +42,10 @@ public class Socket {
     private UserService userService;
 
 
-    @MessageMapping("/send")
-    public void send(Message message) throws JsonProcessingException {
-        messageService.push(message);
-    }
+//    @MessageMapping("/send")
+//    public void send(Message message) throws JsonProcessingException {
+//        messageService.push(message);
+//    }
 
     @MessageMapping("/FriendReq")
     public void friend_req(Notifications message) throws JsonProcessingException {
@@ -61,7 +61,6 @@ public class Socket {
         String action=message.getDescription();
         Optional<User> user1=userService.findById(message.getSender());
         notificationRepository.deleteById(message.getId());
-        System.out.println(message.getDescription()+" "+message.getId());
         if(user1.isPresent()) {
             if (action.equals("accepted")) {
                 userService.addFriend(message.getSender(), message.getReceiver());
@@ -75,6 +74,11 @@ public class Socket {
     @MessageMapping("/connect")
     public void check(ConnectDto message) {
         System.out.println("socket connected");
+    }
+
+    @MessageMapping("/typing")
+    public void typing(Message message) {
+
     }
 
 }

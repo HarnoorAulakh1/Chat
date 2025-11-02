@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +41,9 @@ public class UserController {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private SimpUserRegistry simpUserRegistry;
+
     @GetMapping("/isOnline/{id}")
     public ResponseEntity<?> isOnline(@PathVariable String id){
         if(id.isEmpty())
@@ -51,18 +55,25 @@ public class UserController {
         Optional<User> user=userService.findById(id);
         if(!user.isPresent())
             return new ResponseEntity<>( ResponseMessage.builder().message("User not present").build(), HttpStatus.BAD_REQUEST);
-        return new ResponseEntity<>(ResponseMessage.builder().message("Successfully extracted user").isOnline(user.get().isOnline()).build(),HttpStatus.OK);
+        boolean isOnline;
+        try {
+            isOnline=simpUserRegistry.getUser(id).getSessions().size()!=0;
+        }
+        catch (Exception e){
+            isOnline=false;
+        }
+        return new ResponseEntity<>(ResponseMessage.builder().message("Successfully extracted user").isOnline(isOnline).build(),HttpStatus.OK);
     }
 
-    @GetMapping("/getUser/{id}")
+    @GetMapping("/getUsers/{id}")
     public ResponseEntity<?> getUser(@PathVariable String id){
         if(id==null || id.isEmpty())
             return new ResponseEntity<>(ResponseMessage.builder().message("Username is required"),HttpStatus.NO_CONTENT);
         Query query=new Query();
         query.addCriteria(Criteria.where("username").regex(id));
         List<User> users=mongoTemplate.find(query,User.class);
-        Optional<User> user=userService.findByUsername(id);
-        return new ResponseEntity<>(user,HttpStatus.OK);
+
+        return new ResponseEntity<>(users,HttpStatus.OK);
     }
     @GetMapping("/getPreview")
     public ResponseEntity<?> getPreview(@RequestParam String sender,@RequestParam String receiver, @RequestParam String group){

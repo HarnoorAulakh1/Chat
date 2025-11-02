@@ -2,6 +2,7 @@ package com.example.chat.service;
 
 import com.example.chat.models.Message;
 import com.example.chat.models.Notifications;
+import com.example.chat.models.RedisMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,7 +18,7 @@ public class RedisPublisher {
         this.redisTemplate = redisTemplate;
     }
 
-    public void publish(String channel, Object message) throws JsonProcessingException {
+    public void publish(String channel, RedisMessage message) throws JsonProcessingException {
         ObjectMapper mapper=new ObjectMapper();
         String json=mapper.writeValueAsString(message);
         redisTemplate.convertAndSend(channel, json);

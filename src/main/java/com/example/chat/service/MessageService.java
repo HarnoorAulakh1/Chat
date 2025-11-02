@@ -1,6 +1,8 @@
 package com.example.chat.service;
 
+import com.example.chat.models.MarkAsRead;
 import com.example.chat.models.Message;
+import com.example.chat.models.RedisMessage;
 import com.example.chat.models.User;
 import com.example.chat.repository.MessageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,11 +40,19 @@ public class MessageService {
        return messageRepository.save(message);
     }
 
+
+    public void push(Message message,String channel) throws JsonProcessingException {
+        if(message.getSender()==null || message.getReceiver()==null || message.getContent()==null)
+            return;
+        Message saved=messageRepository.save(message);
+        redisPublisher.publish(channel, RedisMessage.builder().destination("/topic/messages").payload(saved).build());
+    }
+
     public void push(Message message) throws JsonProcessingException {
         if(message.getSender()==null || message.getReceiver()==null || message.getContent()==null)
             return;
         Message saved=messageRepository.save(message);
-        redisPublisher.publish("chat",saved);
+        redisPublisher.publish("chat",RedisMessage.builder().destination("/topic/messages").payload(saved).build());
     }
 
     public List<Message> getMessages(String sender,String receiver){
@@ -112,7 +122,7 @@ public class MessageService {
         return mongoTemplate.count(query, Message.class);
     }
 
-    public void markAsRead(String sender,String receiver,String time,String readBy){
+    public void markAsRead(String sender,String receiver,String time,String readBy) throws JsonProcessingException {
         time = time.replace(" ", "+");
         Instant instant = Instant.parse(time);
 
@@ -147,6 +157,8 @@ public class MessageService {
         );
 
         mongoTemplate.updateMulti(query, update, Message.class);
+        MarkAsRead markAsRead=MarkAsRead.builder().sender(sender).receiver(receiver).time(time).build();
+        redisPublisher.publish("chat", RedisMessage.builder().destination("/topic/markAsRead").payload(markAsRead).build());
     }
 }
 

@@ -5,6 +5,7 @@ import com.example.chat.models.FileInfo;
 import com.example.chat.models.Message;
 import com.example.chat.service.MessageService;
 import com.example.chat.utils.ImageService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,8 +40,8 @@ public class MessageController {
 
         return new ResponseEntity<>(messageService.getUnreadCount(sender,receiver,readBy), HttpStatus.OK);
     }
-    @GetMapping("/markAsRead")
-    public ResponseEntity<?> markAsRead(@RequestParam String sender,@RequestParam String receiver,@RequestParam String readBy,@RequestParam String time){
+    @PostMapping("/markAsRead")
+    public ResponseEntity<?> markAsRead(@RequestParam String sender,@RequestParam String receiver,@RequestParam String readBy,@RequestParam String time) throws JsonProcessingException {
 
         messageService.markAsRead(sender,receiver,time,readBy);
         return new ResponseEntity<>(ResponseMessage.builder().message("Marked read").build(), HttpStatus.OK);

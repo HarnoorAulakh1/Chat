@@ -3,6 +3,7 @@ package com.example.chat.service;
 
 import com.example.chat.controllers.Notification;
 import com.example.chat.models.Notifications;
+import com.example.chat.models.RedisMessage;
 import com.example.chat.repository.NotificationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,6 @@ public class NotificationService {
         Notifications notification=Notifications.builder().type(type).receiver(receiver).sender(sender).description(description).build();
         Notifications saved =notificationRepository.save(notification);
         //System.out.println("notification saved= "+saved.getId());
-        redisPublisher.publish("notifications",saved);
+        redisPublisher.publish("notifications", RedisMessage.builder().destination("/topic/notifications").payload(saved).build());
     }
 }

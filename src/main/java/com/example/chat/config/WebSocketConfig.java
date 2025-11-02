@@ -1,13 +1,16 @@
 package com.example.chat.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
 
@@ -15,11 +18,6 @@ import java.security.Principal;
 @EnableWebSocketMessageBroker  // enables STOMP over WebSocket
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final UserHandshakeInterceptor handshakeInterceptor;
-
-    public WebSocketConfig(UserHandshakeInterceptor handshakeInterceptor) {
-        this.handshakeInterceptor = handshakeInterceptor;
-    }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -34,9 +32,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
                 .setHandshakeHandler(new UserHandshakeHandler())
                 .addInterceptors(new UserHandshakeInterceptor())
-                .setAllowedOrigins("*")
                 .withSockJS();
     }
 
@@ -54,5 +52,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             System.out.println("No principal found for session: " + accessor.getSessionId());
         }
     }
+
+
 
 }

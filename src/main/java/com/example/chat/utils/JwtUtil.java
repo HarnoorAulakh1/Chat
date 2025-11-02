@@ -52,6 +52,8 @@ public class JwtUtil {
         claims.put("username",username);
         Optional<User> newUser=userService.findByUsername(username);
         if(newUser.isPresent()){
+            claims.put("profilePicture",newUser.get().getProfilePicture());
+            claims.put("id",newUser.get().getId());
             claims.put("name",newUser.get().getName());
             claims.put("role",newUser.get().getRole());
             claims.put("email",newUser.get().getEmail());
