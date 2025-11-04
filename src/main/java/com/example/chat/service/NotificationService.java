@@ -18,10 +18,14 @@ public class NotificationService {
     @Autowired
     private RedisPublisher redisPublisher;
 
-    public void push(String sender,String receiver,String description,String type) throws JsonProcessingException {
+    public void push(String sender,String receiver,String description,String type,String destination) throws JsonProcessingException {
         Notifications notification=Notifications.builder().type(type).receiver(receiver).sender(sender).description(description).build();
-        Notifications saved =notificationRepository.save(notification);
+        Notifications saved=null;
+        if(!type.equals("info"))
+            saved =notificationRepository.save(notification);
+        else
+            saved=notification;
         //System.out.println("notification saved= "+saved.getId());
-        redisPublisher.publish("notifications", RedisMessage.builder().destination("/topic/notifications").payload(saved).build());
+        redisPublisher.publish("notifications", RedisMessage.builder().destination(destination).payload(saved).build());
     }
 }

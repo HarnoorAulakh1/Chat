@@ -53,9 +53,10 @@ public class MessageController {
                          @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
         ObjectMapper objectMapper=new ObjectMapper();
         String id=principal.getName();
+        System.out.println(message);
         Message json=objectMapper.readValue(message,Message.class);
         String imageUrl="";
-        if(!file.isEmpty()) {
+        if(file!=null && !file.isEmpty()) {
             try {
                 imageUrl = imageService.uploadImage(file);
             } catch (Exception e) {

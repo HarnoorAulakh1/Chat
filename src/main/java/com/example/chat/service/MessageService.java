@@ -1,9 +1,6 @@
 package com.example.chat.service;
 
-import com.example.chat.models.MarkAsRead;
-import com.example.chat.models.Message;
-import com.example.chat.models.RedisMessage;
-import com.example.chat.models.User;
+import com.example.chat.models.*;
 import com.example.chat.repository.MessageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.bson.types.ObjectId;
@@ -70,7 +67,7 @@ public class MessageService {
                 )
         );
 
-        query.with(Sort.by(Sort.Direction.ASC, "created_at"));
+        query.with(Sort.by(Sort.Direction.ASC, "created_At"));
 
         List<Message> messages = mongoTemplate.find(query,Message.class);
 
@@ -90,11 +87,23 @@ public class MessageService {
     }
 
     public Message getPreview(String sender,String receiver){
-        List<Message> messages = messageRepository.findBySenderAndReceiver(
-                sender,
-                receiver,
-                Sort.by(Sort.Direction.DESC, "createdAt")
+        Query query = new Query();
+        query.addCriteria(
+                new Criteria().orOperator(
+                        new Criteria().andOperator(
+                                Criteria.where("sender").is(sender),
+                                Criteria.where("receiver").is(receiver)
+                        ),
+                        new Criteria().andOperator(
+                                Criteria.where("sender").is(receiver),
+                                Criteria.where("receiver").is(sender)
+                        )
+                )
         );
+
+        query.with(Sort.by(Sort.Direction.DESC, "created_At"));
+
+        List<Message> messages = mongoTemplate.find(query,Message.class);
         if(messages.size()==0)
             return null;
         return messages.get(0);

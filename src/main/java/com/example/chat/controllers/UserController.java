@@ -76,7 +76,7 @@ public class UserController {
         return new ResponseEntity<>(users,HttpStatus.OK);
     }
     @GetMapping("/getPreview")
-    public ResponseEntity<?> getPreview(@RequestParam String sender,@RequestParam String receiver, @RequestParam String group){
+    public ResponseEntity<?> getPreview(@RequestParam String sender,@RequestParam String receiver, @RequestParam(required = false) String group){
         //if(group.isEmpty()){
         if(sender==null || receiver==null || sender.isEmpty() || receiver.isEmpty())
             return new ResponseEntity<>(ResponseMessage.builder().message("sender or receiver missing").build(),HttpStatus.NO_CONTENT);

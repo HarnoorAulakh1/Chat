@@ -24,9 +24,8 @@ public class UserHandshakeInterceptor implements HandshakeInterceptor {
 
         String query = request.getURI().getQuery(); // e.g., username=harnoor
         if (query != null && query.contains("username=")) {
-            username = query.split("=")[1];
+            username = query.split("=").length>1? query.split("=")[1]:"";
         }
-        System.out.println("username= "+username);
 
         // Here we return a Principal via attributes, but to make it work with STOMP:
         attributes.put("username", username);

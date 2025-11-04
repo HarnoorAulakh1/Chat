@@ -20,6 +20,7 @@ public class RedisSubscriberNotification {
         ObjectMapper mapper=new ObjectMapper();
         RedisMessage<Notifications> json1=mapper.readValue(message, new TypeReference<RedisMessage<Notifications>>() {});
         Notifications json= json1.getPayload();
-        simpMessagingTemplate.convertAndSendToUser(json.getReceiver(),"/topic/notifications",json);
+        String destination=json1.getDestination();
+        simpMessagingTemplate.convertAndSendToUser(json.getReceiver(),destination,json);
     }
 }

@@ -51,7 +51,7 @@ public class Socket {
     public void friend_req(Notifications message) throws JsonProcessingException {
         Optional<User> user1=userService.findById(message.getSender());
         if(user1.isPresent())
-            notificationService.push(message.getSender(), message.getReceiver(), "Friend request from "+user1.get().getUsername(),"friend_req");
+            notificationService.push(message.getSender(), message.getReceiver(), "Friend request from "+user1.get().getUsername(),"friend_req","/topic/notification");
     }
 
     @MessageMapping("/FriendReqAction")
@@ -64,9 +64,7 @@ public class Socket {
         if(user1.isPresent()) {
             if (action.equals("accepted")) {
                 userService.addFriend(message.getSender(), message.getReceiver());
-                notificationService.push(message.getSender(), message.getReceiver(), user1.get().getUsername() + " accepted you friend request", "friend_req");
-            } else if (action.equals("rejected")) {
-                notificationService.push(message.getSender(), message.getReceiver(), user1.get().getUsername() + " rejected you friend request", "friend_req");
+                notificationService.push(message.getSender(), message.getReceiver(), user1.get().getUsername() + " accepted you friend request", "friend_req","/topic/notifications");
             }
         }
     }

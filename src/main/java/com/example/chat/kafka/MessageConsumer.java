@@ -22,6 +22,7 @@ public class MessageConsumer {
 
     @KafkaListener(topics = "chat-message", groupId = "chat-app-messages")
     public void consume(Message message) throws JsonProcessingException {
+        System.out.println("Kafka consumer");
         messageService.push(message);
     }
 }

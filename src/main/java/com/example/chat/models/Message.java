@@ -1,5 +1,7 @@
 package com.example.chat.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Document(collection = "messages")
 public class Message {
@@ -29,21 +32,24 @@ public class Message {
 
     private FileInfo file;
 
+    private String time;
+
     @CreatedDate
     private Date created_At;
 
-    private List<read> isRead = new ArrayList<>();
+    private List<Read> isRead = new ArrayList<>();
 
     @Transient
     private User senderEm;
 
     @Transient
     private User receiverEm;
+
 }
 
 
 @Data
-class read{
-    private User user;
+class Read{
+    private String user;
     private String readAt;
 }
