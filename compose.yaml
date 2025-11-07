@@ -1,15 +1,45 @@
-#services:
-#  mongodb:
-#    image: 'mongodb/mongodb-community-server:latest'
-#    environment:
-#      - 'MONGO_INITDB_DATABASE=mydatabase'
-#      - 'MONGO_INITDB_ROOT_PASSWORD=secret'
-#      - 'MONGO_INITDB_ROOT_USERNAME=root'
-#    ports:
-#      - '27017'
-#  redis:
-#    image: 'redis:latest'
-#    ports:
-#      - '6379'
+version: '3.8'
 
 services:
+  app:
+    build: .
+    image: spring-app-image
+    container_name: spring-app
+    ports:
+      - "4000:8080"
+    depends_on:
+      - kafka
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+volumes:
+  mongo-data:
