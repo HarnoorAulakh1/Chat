@@ -25,7 +25,6 @@ public class NotificationService {
             saved =notificationRepository.save(notification);
         else
             saved=notification;
-        //System.out.println("notification saved= "+saved.getId());
         redisPublisher.publish("notifications", RedisMessage.builder().destination(destination).payload(saved).build());
     }
 }

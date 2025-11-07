@@ -26,9 +26,10 @@ public class Notification {
 
     @GetMapping("/deleteNotification/{id}")
     public ResponseEntity<?> deleteNotification(@PathVariable String id){
-        if(id==null || id.isEmpty())
-            return new ResponseEntity<>(ResponseMessage.builder().message("Params not found"), HttpStatus.BAD_REQUEST);
-        notificationRepository.deleteByReceiver(id);
-        return new ResponseEntity<>(ResponseMessage.builder().message("Notification deleted successfully"),HttpStatus.OK);
+        if(id==null || id.isEmpty()) {
+            return new ResponseEntity<>(ResponseMessage.builder().message("Params not found").build(), HttpStatus.BAD_REQUEST);
+        }
+        notificationRepository.deleteById(id);
+        return new ResponseEntity<>(ResponseMessage.builder().message("Notification deleted successfully").build(),HttpStatus.OK);
     }
 }

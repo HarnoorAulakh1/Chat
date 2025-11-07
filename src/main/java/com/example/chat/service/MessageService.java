@@ -3,6 +3,7 @@ package com.example.chat.service;
 import com.example.chat.models.*;
 import com.example.chat.repository.MessageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -10,6 +11,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -48,8 +50,7 @@ public class MessageService {
     public void push(Message message) throws JsonProcessingException {
         if(message.getSender()==null || message.getReceiver()==null || message.getContent()==null)
             return;
-        Message saved=messageRepository.save(message);
-        redisPublisher.publish("chat",RedisMessage.builder().destination("/topic/messages").payload(saved).build());
+        redisPublisher.publish("chat",RedisMessage.builder().destination("/topic/messages").payload(message).build());
     }
 
     public List<Message> getMessages(String sender,String receiver){
@@ -70,17 +71,20 @@ public class MessageService {
         query.with(Sort.by(Sort.Direction.ASC, "created_At"));
 
         List<Message> messages = mongoTemplate.find(query,Message.class);
-
-        for (Message msg : messages) {
-            if (msg.getSender() != null) {
-                Optional<User> user1=userService.findById(msg.getSender());
-                if(user1.isPresent())
-                    msg.setSenderEm(user1.get());
-            }
-            if (msg.getReceiver() != null) {
-                Optional<User> user1=userService.findById(msg.getReceiver());
-                if(user1.isPresent())
-                    msg.setReceiverEm(user1.get());
+        Optional<User> user1;
+        Optional<User> user2;
+        if(!messages.isEmpty()) {
+            user1 = userService.findById(messages.get(0).getSender());
+            user2 = userService.findById(messages.get(0).getReceiver());
+            for (Message msg : messages) {
+                if (msg.getSender() != null) {
+                    if (user1.isPresent())
+                        msg.setSenderEm(user1.get());
+                }
+                if (msg.getReceiver() != null) {
+                    if (user2.isPresent())
+                        msg.setReceiverEm(user2.get());
+                }
             }
         }
         return messages;
@@ -156,7 +160,6 @@ public class MessageService {
 
 
         query.addCriteria(Criteria.where("created_At").lte(isoTime));
-        System.out.println(mongoTemplate.find(query,Message.class));
 
         Update update = new Update().push("isRead",
                 Map.of(
@@ -165,9 +168,11 @@ public class MessageService {
                 )
         );
 
-        mongoTemplate.updateMulti(query, update, Message.class);
+        UpdateResult result=mongoTemplate.updateMulti(query, update, Message.class);
         MarkAsRead markAsRead=MarkAsRead.builder().sender(sender).receiver(receiver).time(time).build();
-        redisPublisher.publish("chat", RedisMessage.builder().destination("/topic/markAsRead").payload(markAsRead).build());
+        System.out.println("count="+result.getMatchedCount());
+        if(result.getMatchedCount()>0)
+            redisPublisher.publish("chat", RedisMessage.builder().destination("/topic/markAsRead").payload(markAsRead).build());
     }
 }
 

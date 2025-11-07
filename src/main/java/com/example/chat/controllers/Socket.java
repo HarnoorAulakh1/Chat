@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,12 +51,18 @@ public class Socket {
     @MessageMapping("/FriendReq")
     public void friend_req(Notifications message) throws JsonProcessingException {
         Optional<User> user1=userService.findById(message.getSender());
-        if(user1.isPresent())
-            notificationService.push(message.getSender(), message.getReceiver(), "Friend request from "+user1.get().getUsername(),"friend_req","/topic/notification");
+        if(user1.isPresent()) {
+            List<String> friends=user1.get().getFriends();
+            if(friends.contains(message.getReceiver()))
+                notificationService.push(message.getSender(), message.getReceiver(), "Already friend , cant send again ", "info", "/topic/notifications");
+            else
+                notificationService.push(message.getSender(), message.getReceiver(), "Friend request from " + user1.get().getUsername(), "friend_req", "/topic/notifications");
+        }
     }
 
     @MessageMapping("/FriendReqAction")
     public void friend_req_action(Notifications message) throws JsonProcessingException {
+        System.out.println(message);
         if(message.getDescription()==null)
             return;
         String action=message.getDescription();
@@ -64,7 +71,9 @@ public class Socket {
         if(user1.isPresent()) {
             if (action.equals("accepted")) {
                 userService.addFriend(message.getSender(), message.getReceiver());
-                notificationService.push(message.getSender(), message.getReceiver(), user1.get().getUsername() + " accepted you friend request", "friend_req","/topic/notifications");
+                notificationService.push(message.getReceiver(), message.getSender(), "Adding"+user1.get().getUsername()+" to your friends", "friend_req_accepted","/topic/friendAccepted");
+                notificationService.push(message.getSender(), message.getReceiver(), user1.get().getUsername() + " accepted you friend request", "friend_req_accepted","/topic/friendAccepted");
+                notificationService.push(message.getSender(), message.getReceiver(), user1.get().getUsername() + " accepted you friend request", "friend_req_accepted","/topic/notifications");
             }
         }
     }
@@ -75,8 +84,8 @@ public class Socket {
     }
 
     @MessageMapping("/typing")
-    public void typing(Message message) {
-
+    public void typing(Notifications message) throws JsonProcessingException {
+        notificationService.push(message.getSender(), message.getReceiver(), message.getDescription(),"info","/topic/typing");
     }
 
 }

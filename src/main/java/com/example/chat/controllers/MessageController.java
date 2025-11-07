@@ -66,7 +66,8 @@ public class MessageController {
         FileInfo fileInfo=json.getFile();
         fileInfo.setLink(imageUrl);
         json.setFile(fileInfo);
-        kafkaProducer.sendMessage("chat-database",id,json);
+        String key=json.getReceiver().compareTo(json.getSender())>0?json.getReceiver()+json.getSender():json.getSender()+json.getReceiver();
+        kafkaProducer.sendMessage("chat-database",key,json);
     }
 
 }

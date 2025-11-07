@@ -45,7 +45,8 @@ public class WebSocketEventsListener {
         if (principle == null) return;
         String userId=principle.getName();
         try {
-            System.out.println(userId + " " + simpUserRegistry.getUser(userId).getSessions().size());
+            int sessions=simpUserRegistry.getUser(userId).getSessions().size();
+            //System.out.println(userId + " " + sessions);
         }
         catch (Exception e){
             List<User> friends=userService.getFriends(userId);

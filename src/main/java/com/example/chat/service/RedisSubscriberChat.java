@@ -38,6 +38,7 @@ public class RedisSubscriberChat {
         }
         simpMessagingTemplate.convertAndSendToUser(json.getReceiver(),destination,json);
         if(destination.equals("/topic/messages")) {
+        System.out.println("Message sent= "+json.getContent());
             simpMessagingTemplate.convertAndSendToUser(json.getSender(), "/topic/preview", json);
             simpMessagingTemplate.convertAndSendToUser(json.getReceiver(), "/topic/preview", json);
         }

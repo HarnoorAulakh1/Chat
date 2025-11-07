@@ -65,6 +65,16 @@ public class UserController {
         return new ResponseEntity<>(ResponseMessage.builder().message("Successfully extracted user").isOnline(isOnline).build(),HttpStatus.OK);
     }
 
+    @GetMapping("/getUserById/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable String id) {
+        if (id == null || id.isEmpty())
+            return new ResponseEntity<>(ResponseMessage.builder().message("Username is required"), HttpStatus.NO_CONTENT);
+
+        Optional<User> user=userService.findById(id);
+        if(!user.isPresent())
+            return new ResponseEntity<>(ResponseMessage.builder().message("No user found").build(),HttpStatus.OK);
+        return new ResponseEntity<>(user.get(),HttpStatus.OK);
+    }
     @GetMapping("/getUsers/{id}")
     public ResponseEntity<?> getUser(@PathVariable String id){
         if(id==null || id.isEmpty())

@@ -50,16 +50,16 @@ public class AuthController {
     }
 
     @PostMapping(value = "/register")
-    public String register(
+    public ResponseEntity<?> register(
             @RequestPart("user") String userJson,
-            @RequestPart(value = "file", required = false) MultipartFile file
+            @RequestPart(value = "profilePicture", required = false) MultipartFile file
     ) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
         User user = mapper.readValue(userJson, User.class);
 
         if(userRepository.findByUsername(user.getUsername()).isPresent()) {
-            return"Username already exists";
+            return new ResponseEntity("Username already exists",HttpStatus.BAD_REQUEST);
         }
         String imageUrl="";
         if(!file.isEmpty()) {
@@ -74,7 +74,7 @@ public class AuthController {
         user.setProfilePicture(imageUrl);
         User userSaved=userService.save(user);
         userRepository.save(userSaved);
-        return "User registered successfully";
+        return new ResponseEntity(ResponseMessage.builder().message("Successfully registered"),HttpStatus.OK);
     }
 
     @PostMapping("/login")
