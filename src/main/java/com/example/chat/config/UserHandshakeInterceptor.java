@@ -22,13 +22,24 @@ public class UserHandshakeInterceptor implements HandshakeInterceptor {
         // Get username from query param or header
         String username = "unknown";
 
-        String query = request.getURI().getQuery(); // e.g., username=harnoor
-        if (query != null && query.contains("username=")) {
-            username = query.split("=").length>1? query.split("=")[1]:"";
+        String query = request.getURI().getQuery();
+//        if (query != null && query.contains("username=")) {
+//            username = query.split("=").length>1? query.split("=")[1]:"";
+//        }
+
+        if(query != null) {
+            for (String param : query.split("&")) {
+                if (param.startsWith("token=")) {
+                    attributes.put("token",param.substring(6));
+                }
+                else if(param.startsWith("username=")){
+                    attributes.put("username",param.substring(9));
+                }
+            }
         }
 
         // Here we return a Principal via attributes, but to make it work with STOMP:
-        attributes.put("username", username);
+        //attributes.put("username", username);
         return true;
     }
 

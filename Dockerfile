@@ -11,7 +11,7 @@ RUN mvn dependency:go-offline -B
 # Copy source code
 COPY src ./src
 
-# Build JAR file
+# Build JAR filea
 RUN mvn clean package -DskipTests
 
 # ===== Stage 2: Run the application =====

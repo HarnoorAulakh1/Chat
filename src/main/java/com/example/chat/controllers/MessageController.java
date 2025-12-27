@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/message")
@@ -55,6 +56,8 @@ public class MessageController {
         String id=principal.getName();
         System.out.println(message);
         Message json=objectMapper.readValue(message,Message.class);
+        json.setId(UUID.randomUUID().toString());
+        // calll message service push ,
         String imageUrl="";
         if(file!=null && !file.isEmpty()) {
             try {
@@ -67,6 +70,7 @@ public class MessageController {
         fileInfo.setLink(imageUrl);
         json.setFile(fileInfo);
         String key=json.getReceiver().compareTo(json.getSender())>0?json.getReceiver()+json.getSender():json.getSender()+json.getReceiver();
+        // messageService.push(message);
         kafkaProducer.sendMessage("chat-database",key,json);
     }
 

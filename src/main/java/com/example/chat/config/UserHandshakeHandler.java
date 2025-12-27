@@ -13,6 +13,7 @@ public class UserHandshakeHandler extends DefaultHandshakeHandler {
     protected Principal determineUser(ServerHttpRequest request,
                                       WebSocketHandler wsHandler,
                                       Map<String, Object> attributes) {
+        System.out.println(attributes);
         String username = (String) attributes.get("username");
         if (username == null) username = "unknown";
         String finalUsername = username;
