@@ -31,6 +31,11 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
+    public String extractId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("id",String.class);
+    }
+
     public Date extractExpiration(String token) {
         return extractAllClaims(token).getExpiration();
     }

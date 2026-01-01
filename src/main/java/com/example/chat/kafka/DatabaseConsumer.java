@@ -24,6 +24,7 @@ public class DatabaseConsumer {
     @KafkaListener(topics = "chat-database", groupId = "chat-app-image")
     public void consume(ConsumerRecord<String, Message> record) {
         Message saved=messageService.save(record.value());
+        System.out.println("value="+saved);
         kafkaProducer.sendMessage("chat-message", record.key(),saved);
     }
 }

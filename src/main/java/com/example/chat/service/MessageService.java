@@ -137,6 +137,7 @@ public class MessageService {
 
     public void markAsRead(String sender,String receiver,String time,String readBy) throws JsonProcessingException {
         time = time.replace(" ", "+");
+        System.out.println("time="+time);
         Instant instant = Instant.parse(time);
 
         Date isoTime= Date.from(instant);
@@ -157,8 +158,6 @@ public class MessageService {
                                 .and("readAt").exists(true)
                 )
         );
-
-
         query.addCriteria(Criteria.where("created_At").lte(isoTime));
 
         Update update = new Update().push("isRead",
@@ -170,7 +169,6 @@ public class MessageService {
 
         UpdateResult result=mongoTemplate.updateMulti(query, update, Message.class);
         MarkAsRead markAsRead=MarkAsRead.builder().sender(sender).receiver(receiver).time(time).build();
-        System.out.println("count="+result.getMatchedCount());
         if(result.getMatchedCount()>0)
             redisPublisher.publish("chat", RedisMessage.builder().destination("/topic/markAsRead").payload(markAsRead).build());
     }

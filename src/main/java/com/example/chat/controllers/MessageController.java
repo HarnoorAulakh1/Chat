@@ -43,7 +43,6 @@ public class MessageController {
     }
     @PostMapping("/markAsRead")
     public ResponseEntity<?> markAsRead(@RequestParam String sender,@RequestParam String receiver,@RequestParam String readBy,@RequestParam String time) throws JsonProcessingException {
-
         messageService.markAsRead(sender,receiver,time,readBy);
         return new ResponseEntity<>(ResponseMessage.builder().message("Marked read").build(), HttpStatus.OK);
     }

@@ -5,11 +5,13 @@ import com.example.chat.service.MessageService;
 import com.example.chat.service.NotificationService;
 import com.example.chat.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -32,9 +34,13 @@ public class WebSocketEventsListener {
     public void onConnect(SessionConnectedEvent event) throws JsonProcessingException {
         Principal principle=event.getUser();
         if (principle == null) return;
-        String userId=principle.getName();
+        CustomPrincipal customPrincipal=(CustomPrincipal)principle;
+        Claims claims=customPrincipal.getClaims();
+        String userId=claims.get("id", String.class);
+        System.out.println("onConnect= "+userId);
         List<User> friends=userService.getFriends(userId);
         for (User friend : friends) {
+            //System.out.println(friend.getName()+);
             notificationService.push(userId, friend.getId(), "user is Online", "info", "/topic/connected");
         }
     }
@@ -43,7 +49,9 @@ public class WebSocketEventsListener {
     public void onDisconnect(SessionDisconnectEvent event) throws JsonProcessingException {
         Principal principle=event.getUser();
         if (principle == null) return;
-        String userId=principle.getName();
+        CustomPrincipal customPrincipal=(CustomPrincipal)principle;
+        Claims claims=customPrincipal.getClaims();
+        String userId=claims.get("id", String.class);
         try {
             int sessions=simpUserRegistry.getUser(userId).getSessions().size();
             //System.out.println(userId + " " + sessions);

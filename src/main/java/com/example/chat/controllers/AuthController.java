@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,12 +50,15 @@ public class AuthController {
         this.mongoTemplate = mongoTemplate;
     }
 
-    @PostMapping(value = "/register")
+    @PostMapping(
+            value = "/register",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public ResponseEntity<?> register(
             @RequestPart("user") String userJson,
             @RequestPart(value = "profilePicture", required = false) MultipartFile file
     ) throws IOException {
-
         ObjectMapper mapper = new ObjectMapper();
         User user = mapper.readValue(userJson, User.class);
 
@@ -74,7 +78,7 @@ public class AuthController {
         user.setProfilePicture(imageUrl);
         User userSaved=userService.save(user);
         userRepository.save(userSaved);
-        return new ResponseEntity(ResponseMessage.builder().message("Successfully registered"),HttpStatus.OK);
+        return new ResponseEntity<>(ResponseMessage.builder().message("Successfully registered").build(),HttpStatus.OK);
     }
 
     @PostMapping("/login")

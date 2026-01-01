@@ -1,16 +1,23 @@
 package com.example.chat.config;
 
+import com.example.chat.models.User;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.server.HandshakeHandler;
 
 import java.security.Principal;
 
@@ -18,6 +25,14 @@ import java.security.Principal;
 @EnableWebSocketMessageBroker  // enables STOMP over WebSocket
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+
+    private final JwtChannelInterceptor jwtChannelInterceptor;
+    private final UserHandshakeHandler userHandshakeHandler;
+
+    public WebSocketConfig(JwtChannelInterceptor jwtChannelInterceptor,UserHandshakeHandler userHandshakeHandler) {
+        this.jwtChannelInterceptor = jwtChannelInterceptor;
+        this.userHandshakeHandler=userHandshakeHandler;
+    }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -32,7 +47,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setHandshakeHandler(new UserHandshakeHandler())
+                .setHandshakeHandler(userHandshakeHandler)
                 .addInterceptors(new UserHandshakeInterceptor())
                 .setAllowedOriginPatterns("http://localhost:5173")
                 .withSockJS();
@@ -51,6 +66,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         } else {
             System.out.println("No principal found for session: " + accessor.getSessionId());
         }
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(jwtChannelInterceptor);
     }
 
 

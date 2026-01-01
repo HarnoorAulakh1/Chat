@@ -19,7 +19,6 @@ import java.util.List;
 @Data
 @Document(collection = "messages")
 public class Message {
-
     @Id
     private String id;
     private String sender;
@@ -34,8 +33,7 @@ public class Message {
 
     private String time;
 
-    @CreatedDate
-    private Date created_At;
+    private Date created_At = new Date();;
 
     private List<Read> isRead = new ArrayList<>();
 
@@ -44,6 +42,7 @@ public class Message {
 
     @Transient
     private User receiverEm;
+
 
 }
 
