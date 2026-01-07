@@ -32,9 +32,9 @@ public class MessageController {
     private ImageService imageService;
 
     @GetMapping("/getMessages")
-    public ResponseEntity<?> getMessages(@RequestParam String sender,@RequestParam String receiver){
-
-        return new ResponseEntity<>(messageService.getMessages(sender,receiver), HttpStatus.OK);
+    public ResponseEntity<?> getMessages(@RequestParam String sender,@RequestParam String receiver,@RequestParam String roomId){
+        System.out.println(sender+" "+roomId);
+        return new ResponseEntity<>(messageService.getMessages(sender,receiver,roomId), HttpStatus.OK);
     }
     @GetMapping("getUnreadCount")
     public ResponseEntity<?> getUnreadCount(@RequestParam String sender,@RequestParam String receiver,@RequestParam String readBy){

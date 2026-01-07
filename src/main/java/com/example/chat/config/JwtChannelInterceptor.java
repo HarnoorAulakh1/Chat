@@ -66,6 +66,11 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                         .getPayload();
 
                 String username = claims.getSubject();
+                String id="",roomId=claims.get("roomId",String.class);
+                if(roomId!=null)
+                    id=claims.get("memberId",String.class);
+                else
+                    id=claims.get("id",String.class);
 
 //                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
 //                        claims,
@@ -73,7 +78,10 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
 //                        List.of()
 //                );
 
-                CustomPrincipal customPrincipal=new CustomPrincipal(claims.get("id",String.class),claims);
+//                System.out.println("check 1"+token);
+//                System.out.println("Id= "+id);
+
+                CustomPrincipal customPrincipal=new CustomPrincipal(id,claims);
                 accessor.setUser(customPrincipal);
             } catch (JwtException ex) {
                 // Invalid / expired token → reject CONNECT

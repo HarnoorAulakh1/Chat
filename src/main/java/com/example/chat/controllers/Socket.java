@@ -62,7 +62,7 @@ public class Socket {
 
     @MessageMapping("/FriendReqAction")
     public void friend_req_action(Notifications message) throws JsonProcessingException {
-        System.out.println(message);
+        //System.out.println(message);
         if(message.getDescription()==null)
             return;
         String action=message.getDescription();

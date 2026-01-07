@@ -53,6 +53,7 @@ public class UserController {
                     ,HttpStatus.BAD_REQUEST);
 
         Optional<User> user=userService.findById(id);
+        //System.out.println("Users Connected= "+simpUserRegistry.getUsers());
         if(!user.isPresent())
             return new ResponseEntity<>( ResponseMessage.builder().message("User not present").build(), HttpStatus.BAD_REQUEST);
         boolean isOnline;

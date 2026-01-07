@@ -45,7 +45,7 @@ public class JwtSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/ws/**","/auth/**", "/api/random","/public","/user/checkLogin").permitAll()
+                        auth.requestMatchers("/ws/**","/auth/**", "/api/random","/room/create","/room/join","/public","/user/checkLogin").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())

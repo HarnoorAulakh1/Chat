@@ -25,7 +25,7 @@ public class UserHandshakeHandler extends DefaultHandshakeHandler {
                                       Map<String, Object> attributes) {
         String token = (String) attributes.get("JWT_TOKEN");
         String userId= jwtUtil.extractId(token);
-        System.out.println("HandshakeHandler= "+userId);
+        //System.out.println("HandshakeHandler= "+userId);
 
         if (userId == null) userId = "unknown";
         String finalUserId = userId;

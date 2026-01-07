@@ -1,5 +1,6 @@
 package com.example.chat.utils;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -50,17 +51,24 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        //System.out.println("token= "+jwt);
-
 
         if (jwt != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String username = jwtUtil.extractUsername(jwt);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            //System.out.println("token1 ="+jwtUtil.validateToken(jwt));
-            if (jwtUtil.validateToken(jwt)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            Claims claims=jwtUtil.extractAllClaims(jwt);
+            String username = jwtUtil.extractUsername(jwt),roomId=claims.get("roomId",String.class),memberId=claims.get("memberId",String.class);
+            if(roomId!=null){
+                UserDetails userDetails = userDetailsService.loadUserByUsername(memberId);
+                if (jwtUtil.validateToken(jwt)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }else {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (jwtUtil.validateToken(jwt)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
         }
 

@@ -47,26 +47,25 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setHandshakeHandler(userHandshakeHandler)
                 .addInterceptors(new UserHandshakeInterceptor())
                 .setAllowedOriginPatterns("http://localhost:5173")
                 .withSockJS();
     }
 
 
-    @EventListener
-    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        Principal principal = accessor.getUser();
-
-        if (principal != null) {
-            String username = principal.getName();
-            String sessionId = accessor.getSessionId();
-            //System.out.println("User connected: " + username + " -> " + sessionId);
-        } else {
-            System.out.println("No principal found for session: " + accessor.getSessionId());
-        }
-    }
+//    @EventListener
+//    public void handleWebSocketConnectListener(SessionConnectedEvent event) {
+//        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+//        Principal principal = accessor.getUser();
+//
+//        if (principal != null) {
+//            String username = principal.getName();
+//            String sessionId = accessor.getSessionId();
+//            //System.out.println("User connected: " + username + " -> " + sessionId);
+//        } else {
+//            System.out.println("No principal found for session: " + accessor.getSessionId());
+//        }
+//    }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {

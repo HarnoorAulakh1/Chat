@@ -31,11 +31,10 @@ public class Notifications {
     private String type;
     private String title;
     private String description;
+    @Builder.Default
+    @Indexed(expireAfter = "3600s")
+    private Date createdAt=new Date();;
 
-    @Indexed(expireAfterSeconds=3600)
-    @CreatedDate
-    private Date created_at;
-
-    @LastModifiedDate   // 👈 auto-updated whenever saved again
+    @LastModifiedDate
     private Date updatedAt;
 }

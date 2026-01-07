@@ -1,6 +1,7 @@
 package com.example.chat.service;
 
 import com.example.chat.models.*;
+import com.example.chat.repository.MemberRepository;
 import com.example.chat.repository.MessageRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.client.result.UpdateResult;
@@ -34,6 +35,8 @@ public class MessageService {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private MemberRepository memberRepository;
 
     public Message save(Message message){
        return messageRepository.save(message);
@@ -53,41 +56,56 @@ public class MessageService {
         redisPublisher.publish("chat",RedisMessage.builder().destination("/topic/messages").payload(message).build());
     }
 
-    public List<Message> getMessages(String sender,String receiver){
+    public List<Message> getMessages(String sender,String receiver,String roomId){
         Query query = new Query();
-        query.addCriteria(
-                new Criteria().orOperator(
-                        new Criteria().andOperator(
-                                Criteria.where("sender").is(sender),
-                                Criteria.where("receiver").is(receiver)
-                        ),
-                        new Criteria().andOperator(
-                                Criteria.where("sender").is(receiver),
-                                Criteria.where("receiver").is(sender)
-                        )
-                )
-        );
-
-        query.with(Sort.by(Sort.Direction.ASC, "created_At"));
-
-        List<Message> messages = mongoTemplate.find(query,Message.class);
         Optional<User> user1;
         Optional<User> user2;
-        if(!messages.isEmpty()) {
-            user1 = userService.findById(messages.get(0).getSender());
-            user2 = userService.findById(messages.get(0).getReceiver());
-            for (Message msg : messages) {
-                if (msg.getSender() != null) {
-                    if (user1.isPresent())
-                        msg.setSenderEm(user1.get());
-                }
-                if (msg.getReceiver() != null) {
-                    if (user2.isPresent())
-                        msg.setReceiverEm(user2.get());
+        if(roomId==null) {
+            query.addCriteria(
+                    new Criteria().orOperator(
+                            new Criteria().andOperator(
+                                    Criteria.where("sender").is(sender),
+                                    Criteria.where("receiver").is(receiver)
+                            ),
+                            new Criteria().andOperator(
+                                    Criteria.where("sender").is(receiver),
+                                    Criteria.where("receiver").is(sender)
+                            )
+                    )
+            );
+
+            query.with(Sort.by(Sort.Direction.ASC, "created_At"));
+            List<Message> messages = mongoTemplate.find(query,Message.class);
+            if(!messages.isEmpty()) {
+                user1 = userService.findById(messages.get(0).getSender());
+                user2 = userService.findById(messages.get(0).getReceiver());
+                for (Message msg : messages) {
+                    if (msg.getSender() != null) {
+                        if (user1.isPresent())
+                            msg.setSenderEm(user1.get());
+                    }
+                    if (msg.getReceiver() != null) {
+                        if (user2.isPresent())
+                            msg.setReceiverEm(user2.get());
+                    }
                 }
             }
+            return messages;
         }
-        return messages;
+        else{
+            query.addCriteria(Criteria.where("roomId").is(roomId));
+            List<Message> messages = mongoTemplate.find(query,Message.class);
+            if(!messages.isEmpty()) {
+                for (Message msg : messages) {
+                    if (msg.getSender() != null) {
+                        Optional<Member> member=memberRepository.findById(msg.getSender());
+                        if (member.isPresent())
+                            msg.setSenderEm(User.builder().username(member.get().getUsername()).id(member.get().getId()).email("").password("").name("").build());
+                    }
+                }
+            }
+            return messages;
+        }
     }
 
     public Message getPreview(String sender,String receiver){

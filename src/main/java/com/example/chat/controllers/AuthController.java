@@ -96,12 +96,11 @@ public class AuthController {
         }
         String token = jwtUtil.generateToken(username);
 
-        // --- Set JWT in a cookie ---
         Cookie cookie = new Cookie("JWT_TOKEN", token);
-        cookie.setHttpOnly(true);           // Cannot be accessed via JavaScript (safer)
-        cookie.setSecure(true);             // Only over HTTPS (set false for local dev)
-        cookie.setPath("/");                // Cookie valid for all paths
-        cookie.setMaxAge(60 * 60);          // 1 hour
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60);
         response.addCookie(cookie);
 
         return ResponseEntity.ok("Login successful");

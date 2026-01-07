@@ -1,27 +1,31 @@
 package com.example.chat.models;
 
+import lombok.Builder;
 import lombok.Data;
-import org.bson.types.ObjectId;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-@Document(collection = "group")
+@Document(collection = "room")
 @Data
-public class Group {
+@Builder
+public class Chatroom {
 
     @Id
     private String id;
     private String name;
-    @DBRef
-    private List<User> admins=new ArrayList<>();
+    private List<String> members=new ArrayList<>();
     private String logo;
-    @DBRef
-    private List<User> members=new ArrayList<>();
     private List<Saved> saved=new ArrayList<>();
+    @Builder.Default
+    @Indexed(expireAfter = "3600s")
+    private Date createdAt=new Date();
 }
 
 

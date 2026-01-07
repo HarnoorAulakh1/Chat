@@ -33,15 +33,18 @@ public class WebSocketEventsListener {
     @EventListener
     public void onConnect(SessionConnectedEvent event) throws JsonProcessingException {
         Principal principle=event.getUser();
+        //System.out.println("Custom principal= "+principle);
         if (principle == null) return;
         CustomPrincipal customPrincipal=(CustomPrincipal)principle;
         Claims claims=customPrincipal.getClaims();
-        String userId=claims.get("id", String.class);
-        System.out.println("onConnect= "+userId);
-        List<User> friends=userService.getFriends(userId);
-        for (User friend : friends) {
-            //System.out.println(friend.getName()+);
-            notificationService.push(userId, friend.getId(), "user is Online", "info", "/topic/connected");
+        String roomId=claims.get("roomId",String.class);
+        String userId=roomId==null?claims.get("id",String.class):claims.get("memberId",String.class);
+        if(roomId==null) {
+            List<User> friends = userService.getFriends(userId);
+            for (User friend : friends) {
+                //System.out.println(friend.getName()+);
+                notificationService.push(userId, friend.getId(), "user is Online", "info", "/topic/connected");
+            }
         }
     }
 
@@ -51,15 +54,18 @@ public class WebSocketEventsListener {
         if (principle == null) return;
         CustomPrincipal customPrincipal=(CustomPrincipal)principle;
         Claims claims=customPrincipal.getClaims();
-        String userId=claims.get("id", String.class);
+        String roomId=claims.get("roomId",String.class);
+        String userId=roomId==null?claims.get("id",String.class):claims.get("memberId",String.class);
         try {
             int sessions=simpUserRegistry.getUser(userId).getSessions().size();
             //System.out.println(userId + " " + sessions);
         }
         catch (Exception e){
-            List<User> friends=userService.getFriends(userId);
-            for (User friend : friends)
-                notificationService.push(userId, friend.getId(), "user is offline", "info", "/topic/disconnected");
+                List<User> friends = userService.getFriends(userId);
+                for (User friend : friends) {
+                    //System.out.println(friend.getName()+);
+                    notificationService.push(userId, friend.getId(), "user is Online", "info", "/topic/disconnected");
+                }
         }
     }
 }

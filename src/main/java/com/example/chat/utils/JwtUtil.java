@@ -1,6 +1,10 @@
 package com.example.chat.utils;
 
+import com.example.chat.models.Chatroom;
+import com.example.chat.models.Member;
 import com.example.chat.models.User;
+import com.example.chat.repository.MemberRepository;
+import com.example.chat.repository.RoomRepository;
 import com.example.chat.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -21,6 +25,10 @@ public class JwtUtil {
     private UserService userService;
 
     private String SECRET_KEY = "TaK+HaV^uvCHEFsEVfypW#7g9^k*Z8$V";
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private RoomRepository roomRepository;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
@@ -28,7 +36,7 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.getSubject();
+        return claims.get("username",String.class);
     }
 
     public String extractId(String token) {
@@ -65,6 +73,32 @@ public class JwtUtil {
         }
         return createToken(claims, username);
     }
+    public String generateTokenForChatroom(String roomId,String username,String memberId) {
+        Map<String, Object> claims = new HashMap<>();
+        Optional<Chatroom> chatroom=roomRepository.findById(roomId);
+        claims.put("username",username);
+        claims.put("roomId",roomId);
+        if(chatroom.isPresent())
+            claims.put("roomName",chatroom.get().getName());
+        claims.put("memberId",memberId);
+//        Optional<Member> newUser=memberRepository.findByUsername(username);
+//        if(newUser.isPresent()){
+//            claims.put("id",newUser.get().getId());
+//        }
+        return createTokenForChatroom(claims, username);
+    }
+
+    private String createTokenForChatroom(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .claims(claims)
+                .subject(subject)
+                .header().empty().add("typ","JWT")
+                .and()
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .signWith(getSigningKey())
+                .compact();
+    }
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
@@ -73,7 +107,7 @@ public class JwtUtil {
                 .header().empty().add("typ","JWT")
                 .and()
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 5 minutes expiration time
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(getSigningKey())
                 .compact();
     }

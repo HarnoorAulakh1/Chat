@@ -25,7 +25,7 @@ public class Message {
     private String receiver;
 
     private String content;
-    private String group;
+    private String roomId;
 
     private String image;
 
@@ -33,7 +33,7 @@ public class Message {
 
     private String time;
 
-    private Date created_At = new Date();;
+    private Date created_At = new Date();
 
     private List<Read> isRead = new ArrayList<>();
 
