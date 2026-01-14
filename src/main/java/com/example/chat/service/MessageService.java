@@ -60,7 +60,7 @@ public class MessageService {
         Query query = new Query();
         Optional<User> user1;
         Optional<User> user2;
-        if(roomId==null) {
+        if(roomId==null || roomId.isEmpty()) {
             query.addCriteria(
                     new Criteria().orOperator(
                             new Criteria().andOperator(
@@ -81,12 +81,16 @@ public class MessageService {
                 user2 = userService.findById(messages.get(0).getReceiver());
                 for (Message msg : messages) {
                     if (msg.getSender() != null) {
-                        if (user1.isPresent())
+                        if (user1.isPresent() && user1.get().getId().equals(msg.getSender()))
                             msg.setSenderEm(user1.get());
+                        else
+                            msg.setSenderEm(user2.get());
                     }
                     if (msg.getReceiver() != null) {
-                        if (user2.isPresent())
+                        if (user2.isPresent() && user2.get().getId().equals(msg.getReceiver()))
                             msg.setReceiverEm(user2.get());
+                        else
+                            msg.setReceiverEm(user1.get());
                     }
                 }
             }
@@ -155,7 +159,7 @@ public class MessageService {
 
     public void markAsRead(String sender,String receiver,String time,String readBy) throws JsonProcessingException {
         time = time.replace(" ", "+");
-        System.out.println("time="+time);
+        //System.out.println("time="+time);
         Instant instant = Instant.parse(time);
 
         Date isoTime= Date.from(instant);

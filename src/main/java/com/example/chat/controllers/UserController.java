@@ -1,6 +1,8 @@
 package com.example.chat.controllers;
 
+import com.example.chat.models.Ice;
 import com.example.chat.models.Message;
+import com.example.chat.models.Offer;
 import com.example.chat.models.User;
 import com.example.chat.service.MessageService;
 import com.example.chat.utils.JwtUtil;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Indexed;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

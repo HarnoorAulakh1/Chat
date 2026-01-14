@@ -1,4 +1,5 @@
 package com.example.chat.controllers;
+import com.example.chat.models.Ice;
 import com.example.chat.models.Message;
 import com.example.chat.models.Notifications;
 import com.example.chat.models.User;
@@ -41,12 +42,16 @@ public class Socket {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
 
 //    @MessageMapping("/send")
 //    public void send(Message message) throws JsonProcessingException {
 //        messageService.push(message);
 //    }
+
+
 
     @MessageMapping("/FriendReq")
     public void friend_req(Notifications message) throws JsonProcessingException {
