@@ -33,7 +33,7 @@ public class MessageController {
 
     @GetMapping("/getMessages")
     public ResponseEntity<?> getMessages(@RequestParam String sender,@RequestParam String receiver,@RequestParam String roomId){
-        System.out.println(sender+" "+roomId);
+        //System.out.println(sender+" "+roomId);
         return new ResponseEntity<>(messageService.getMessages(sender,receiver,roomId), HttpStatus.OK);
     }
     @GetMapping("getUnreadCount")
@@ -53,7 +53,7 @@ public class MessageController {
                          @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
         ObjectMapper objectMapper=new ObjectMapper();
         String id=principal.getName();
-        System.out.println(message);
+        //System.out.println(message);
         Message json=objectMapper.readValue(message,Message.class);
         json.setId(UUID.randomUUID().toString());
         // calll message service push ,

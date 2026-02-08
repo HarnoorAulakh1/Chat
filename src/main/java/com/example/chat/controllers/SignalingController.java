@@ -1,6 +1,7 @@
 package com.example.chat.controllers;
 
 
+import com.example.chat.models.Call;
 import com.example.chat.models.Ice;
 import com.example.chat.models.IceCandidate;
 import com.example.chat.models.Offer;
@@ -18,10 +19,24 @@ public class SignalingController {
 
     @MessageMapping("/ice")
     public void exchangeIce(Ice ice){
-        System.out.println("Ice is= "+ice.getCandidate());
+        //System.out.println("Ice is= "+ice);
         String receiver=ice.getReceiver();
         IceCandidate candidate=ice.getCandidate();
         simpMessagingTemplate.convertAndSendToUser(receiver,"/topic/ice",ice);
+    }
+
+    @MessageMapping("/sendIncoming")
+    public void incomingCall(Call call){
+        String receiver=call.getReceiver();
+        System.out.println("Incomeing sent= "+receiver);
+        simpMessagingTemplate.convertAndSendToUser(receiver,"/topic/incoming",call);
+    }
+
+    @MessageMapping("/action")
+    public void incomingAction(Call call){
+        String receiver=call.getReceiver();
+        System.out.println("Status= "+call.getStatus());
+        simpMessagingTemplate.convertAndSendToUser(receiver,"/topic/action",call);
     }
 
     @MessageMapping("/offer")
@@ -34,6 +49,7 @@ public class SignalingController {
     @MessageMapping("/answer")
     public void sendAnswer(Offer offer){
         String receiver=offer.getReceiver(),answer=offer.getSdp(),type=offer.getType();
+        //System.out.println("Answer="+offer);
         simpMessagingTemplate.convertAndSendToUser(receiver,"/topic/answer",offer);
     }
 }
