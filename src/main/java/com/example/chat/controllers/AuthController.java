@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -59,6 +60,7 @@ public class AuthController {
             @RequestPart("user") String userJson,
             @RequestPart(value = "profilePicture", required = false) MultipartFile file
     ) throws IOException {
+        System.out.println("hi");
         ObjectMapper mapper = new ObjectMapper();
         User user = mapper.readValue(userJson, User.class);
 
@@ -96,12 +98,15 @@ public class AuthController {
         }
         String token = jwtUtil.generateToken(username);
 
-        Cookie cookie = new Cookie("JWT_TOKEN", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from("JWT_TOKEN", token) .httpOnly(true)                  // not accessible from JS
+                .secure(true)
+                .sameSite("None")
+                .domain("aulakh.site")
+                .path("/")
+                .maxAge(60 * 60)
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
 
         return ResponseEntity.ok("Login successful");
     }
